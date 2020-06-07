@@ -7,6 +7,14 @@
   "description": "A git library for GitHub Actions",
   "main": "lib/actions-git.js",
   "types": "lib/actions-git.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib",
+    "!.DS_Store"
+  ],
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
