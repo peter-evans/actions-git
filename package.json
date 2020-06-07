@@ -1,5 +1,5 @@
 {
-  "name": "@peter-evans/actions-git",
+  "name": "actions-git",
   "version": "1.0.0",
   "publishConfig": {
     "access": "public"
