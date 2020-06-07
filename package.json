@@ -1,0 +1,51 @@
+{
+  "name": "@peter-evans/actions-git",
+  "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "A git library for GitHub Actions",
+  "main": "lib/actions-git.js",
+  "types": "lib/actions-git.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write '**/*.ts'",
+    "format-check": "prettier --check '**/*.ts'",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peter-evans/actions-git.git"
+  },
+  "keywords": [
+    "actions",
+    "git",
+    "github"
+  ],
+  "author": "Peter Evans",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/peter-evans/actions-git/issues"
+  },
+  "homepage": "https://github.com/peter-evans/actions-git",
+  "dependencies": {
+    "@actions/core": "1.2.4",
+    "@actions/exec": "1.0.4",
+    "@actions/io": "1.0.2"
+  },
+  "devDependencies": {
+    "@types/jest": "25.2.2",
+    "@types/node": "14.0.1",
+    "@typescript-eslint/parser": "2.33.0",
+    "eslint": "7.0.0",
+    "eslint-plugin-github": "3.4.1",
+    "eslint-plugin-jest": "23.11.0",
+    "jest": "26.0.1",
+    "jest-circus": "26.0.1",
+    "js-yaml": "3.13.1",
+    "prettier": "2.0.5",
+    "ts-jest": "25.5.1",
+    "typescript": "3.9.2"
+  }
+}
