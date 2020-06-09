@@ -35,6 +35,8 @@ export interface IGitCommandManager {
   lfsFetch(ref: string): Promise<void>
   lfsInstall(): Promise<void>
   log1(options?: string[]): Promise<string>
+  push(remoteName?: string, ref?: string, options?: string[]): Promise<void>
+  rebase(remoteName: string, ref: string): Promise<boolean>
   remoteAdd(remoteName: string, remoteUrl: string): Promise<void>
   removeEnvironmentVariable(name: string): void
   revParse(ref: string): Promise<string>
@@ -244,6 +246,29 @@ class GitCommandManager {
     }
     const output = await this.execGit(args)
     return output.stdout
+  }
+
+  async push(
+    remoteName?: string,
+    ref?: string,
+    options?: string[]
+  ): Promise<void> {
+    const args = ['push']
+    if (options) {
+      args.push(...options)
+    }
+    if (remoteName) {
+      args.push(remoteName)
+    }
+    if (ref) {
+      args.push(ref)
+    }
+    await this.execGit(args)
+  }
+
+  async rebase(remoteName: string, ref: string): Promise<boolean> {
+    const output = await this.execGit(['rebase', `${remoteName}/${ref}`])
+    return !output.stdout.trim().endsWith('is up to date.')
   }
 
   async remoteAdd(remoteName: string, remoteUrl: string): Promise<void> {
