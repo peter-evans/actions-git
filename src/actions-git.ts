@@ -24,13 +24,19 @@ export interface IGitCommandManager {
     globalConfig?: boolean
   ): Promise<void>
   configExists(configKey: string, globalConfig?: boolean): Promise<boolean>
-  fetch(refSpec: string[], fetchDepth?: number): Promise<void>
+  fetch(
+    refSpec: string[],
+    fetchDepth?: number,
+    remoteName?: string
+  ): Promise<void>
   getWorkingDirectory(): string
   init(): Promise<void>
   isDetached(): Promise<boolean>
   lfsFetch(ref: string): Promise<void>
   lfsInstall(): Promise<void>
-  log1(): Promise<string>
+  log1(options?: string[]): Promise<string>
+  push(remoteName?: string, ref?: string, options?: string[]): Promise<void>
+  rebase(remoteName: string, ref: string): Promise<boolean>
   remoteAdd(remoteName: string, remoteUrl: string): Promise<void>
   removeEnvironmentVariable(name: string): void
   revParse(ref: string): Promise<string>
@@ -167,7 +173,11 @@ class GitCommandManager {
     return output.exitCode === 0
   }
 
-  async fetch(refSpec: string[], fetchDepth?: number): Promise<void> {
+  async fetch(
+    refSpec: string[],
+    fetchDepth?: number,
+    remoteName?: string
+  ): Promise<void> {
     const args = ['-c', 'protocol.version=2', 'fetch']
     if (!refSpec.some(x => x === refHelper.tagsRefSpec)) {
       args.push('--no-tags')
@@ -184,7 +194,11 @@ class GitCommandManager {
       args.push('--unshallow')
     }
 
-    args.push('origin')
+    if (remoteName) {
+      args.push(remoteName)
+    } else {
+      args.push('origin')
+    }
     for (const arg of refSpec) {
       args.push(arg)
     }
@@ -225,9 +239,36 @@ class GitCommandManager {
     await this.execGit(['lfs', 'install', '--local'])
   }
 
-  async log1(): Promise<string> {
-    const output = await this.execGit(['log', '-1'])
+  async log1(options?: string[]): Promise<string> {
+    const args = ['log', '-1']
+    if (options) {
+      args.push(...options)
+    }
+    const output = await this.execGit(args)
     return output.stdout
+  }
+
+  async push(
+    remoteName?: string,
+    ref?: string,
+    options?: string[]
+  ): Promise<void> {
+    const args = ['push']
+    if (options) {
+      args.push(...options)
+    }
+    if (remoteName) {
+      args.push(remoteName)
+    }
+    if (ref) {
+      args.push(ref)
+    }
+    await this.execGit(args)
+  }
+
+  async rebase(remoteName: string, ref: string): Promise<boolean> {
+    const output = await this.execGit(['rebase', `${remoteName}/${ref}`])
+    return !output.stdout.trim().endsWith('is up to date.')
   }
 
   async remoteAdd(remoteName: string, remoteUrl: string): Promise<void> {
