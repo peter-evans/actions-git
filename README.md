@@ -8,21 +8,14 @@ It has then been extended with additional git commands.
 
 ## Usage
 
-Import the package
-```javascript
-// javascript
-const actionsGit = require('actions-git');
-
-// typescript
+```typescript
 import * as actionsGit from 'actions-git';
 ```
 
-Execute git commands
-```javascript
-// javascript
-
-// typescript
+```typescript
 const workingDirectory = '.'
 const lfs = false
 const git = await actionsGit.createCommandManager(workingDirectory, lfs)
+
+await git.fetch('my-branch')
 ```
