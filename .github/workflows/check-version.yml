@@ -1,0 +1,41 @@
+name: Check Version
+on:
+  pull_request:
+    branches: [master]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Extract package.json version
+        id: vars
+        run: echo ::set-output name=version::$(jq -r .version package.json)
+
+      - run: echo ${{ steps.vars.outputs.version }}
+
+      - name: Check if a matching tag exists
+        id: tag-exists
+        uses: actions/github-script@v2
+        with:
+          result-encoding: string
+          script: |
+            try {
+              const response = await github.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/v${{ steps.vars.outputs.version }}`
+              })
+              return response.status === 200 ? 'true' : 'false'
+            } catch(error) {
+              return 'false'
+            }
+
+      - name: Output result
+        if: steps.tag-exists.outputs.result == 'true'
+        run: |
+          echo "::error::Release already exists for package.json version!"
+          exit 1
