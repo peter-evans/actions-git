@@ -19,7 +19,7 @@ import * as actionsGit from '@peter-evans/actions-git';
 ```typescript
 const workingDirectory = '.'
 const lfs = false
-const git = await actionsGit.createCommandManager(workingDirectory, lfs)
+const git = await actionsGit.createGitCommandManager(workingDirectory, lfs)
 
 await git.fetch('my-branch')
 ```
