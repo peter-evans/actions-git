@@ -13,7 +13,7 @@ npm install @peter-evans/actions-git
 ```
 
 ```typescript
-import * as actionsGit from '@peter-evans/actions-git';
+import * as actionsGit from '@peter-evans/actions-git'
 ```
 
 ```typescript
