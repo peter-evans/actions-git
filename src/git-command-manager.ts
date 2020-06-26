@@ -24,6 +24,7 @@ export interface IGitCommandManager {
     globalConfig?: boolean
   ): Promise<void>
   configExists(configKey: string, globalConfig?: boolean): Promise<boolean>
+  clone(remoteUrl: string): Promise<void>
   fetch(
     refSpec: string[],
     fetchDepth?: number,
@@ -171,6 +172,13 @@ class GitCommandManager {
       true
     )
     return output.exitCode === 0
+  }
+
+  async clone(remoteUrl: string): Promise<void> {
+    const args = ['clone']
+    args.push(remoteUrl)
+    args.push(this.workingDirectory)
+    await this.execGit(args)
   }
 
   async fetch(
