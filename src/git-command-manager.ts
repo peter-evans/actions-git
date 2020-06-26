@@ -13,11 +13,13 @@ import {GitVersion} from './git-version'
 export const MinimumGitVersion = new GitVersion('2.18')
 
 export interface IGitCommandManager {
+  add(options?: string[]): Promise<void>
   branchDelete(remote: boolean, branch: string): Promise<void>
   branchExists(remote: boolean, pattern: string): Promise<boolean>
   branchList(remote: boolean): Promise<string[]>
   checkout(ref: string, startPoint: string): Promise<void>
   checkoutDetach(): Promise<void>
+  commit(message: string): Promise<void>
   config(
     configKey: string,
     configValue: string,
@@ -72,6 +74,14 @@ class GitCommandManager {
 
   // Private constructor; use createCommandManager()
   private constructor() {}
+
+  async add(options?: string[]): Promise<void> {
+    const args = ['add']
+    if (options) {
+      args.push(...options)
+    }
+    await this.execGit(args)
+  }
 
   async branchDelete(remote: boolean, branch: string): Promise<void> {
     const args = ['branch', '--delete', '--force']
@@ -140,6 +150,11 @@ class GitCommandManager {
 
   async checkoutDetach(): Promise<void> {
     const args = ['checkout', '--detach']
+    await this.execGit(args)
+  }
+
+  async commit(message: string): Promise<void> {
+    const args = ['commit', '-m', `"${message}"`]
     await this.execGit(args)
   }
 
