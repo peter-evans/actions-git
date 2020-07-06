@@ -17,8 +17,9 @@ export interface IGitCommandManager {
   branchDelete(remote: boolean, branch: string): Promise<void>
   branchExists(remote: boolean, pattern: string): Promise<boolean>
   branchList(remote: boolean): Promise<string[]>
-  checkout(ref: string, startPoint: string): Promise<void>
+  checkout(ref: string, startPoint?: string): Promise<void>
   checkoutDetach(): Promise<void>
+  cherryPick(commit: string, options?: string[]): Promise<void>
   commit(message: string): Promise<void>
   config(
     configKey: string,
@@ -27,10 +28,12 @@ export interface IGitCommandManager {
   ): Promise<void>
   configExists(configKey: string, globalConfig?: boolean): Promise<boolean>
   clone(remoteUrl: string): Promise<void>
+  diff(options?: string[]): Promise<string>
   fetch(
     refSpec: string[],
     fetchDepth?: number,
-    remoteName?: string
+    remoteName?: string,
+    options?: string
   ): Promise<void>
   getWorkingDirectory(): string
   init(): Promise<void>
@@ -42,12 +45,14 @@ export interface IGitCommandManager {
   rebase(remoteName: string, ref: string): Promise<boolean>
   remoteAdd(remoteName: string, remoteUrl: string): Promise<void>
   removeEnvironmentVariable(name: string): void
+  revList(commitExpression: string[], options?: string[]): Promise<string>
   revParse(ref: string): Promise<string>
   setEnvironmentVariable(name: string, value: string): void
   shaExists(sha: string): Promise<boolean>
   submoduleForeach(command: string, recursive: boolean): Promise<string>
   submoduleSync(recursive: boolean): Promise<void>
   submoduleUpdate(fetchDepth: number, recursive: boolean): Promise<void>
+  symbolicRef(ref: string, options?: string[]): Promise<string>
   tagExists(pattern: string): Promise<boolean>
   tryClean(): Promise<boolean>
   tryConfigUnset(configKey: string, globalConfig?: boolean): Promise<boolean>
@@ -137,7 +142,7 @@ class GitCommandManager {
     return result
   }
 
-  async checkout(ref: string, startPoint: string): Promise<void> {
+  async checkout(ref: string, startPoint?: string): Promise<void> {
     const args = ['checkout', '--progress', '--force']
     if (startPoint) {
       args.push('-B', ref, startPoint)
@@ -150,6 +155,15 @@ class GitCommandManager {
 
   async checkoutDetach(): Promise<void> {
     const args = ['checkout', '--detach']
+    await this.execGit(args)
+  }
+
+  async cherryPick(commit: string, options?: string[]): Promise<void> {
+    const args = ['cherry-pick']
+    if (options) {
+      args.push(...options)
+    }
+    args.push(commit)
     await this.execGit(args)
   }
 
@@ -196,10 +210,20 @@ class GitCommandManager {
     await this.execGit(args)
   }
 
+  async diff(options?: string[]): Promise<string> {
+    const args = ['-c', 'core.pager=cat', 'diff']
+    if (options) {
+      args.push(...options)
+    }
+    const output = await this.execGit(args)
+    return output.stdout.trim()
+  }
+
   async fetch(
     refSpec: string[],
     fetchDepth?: number,
-    remoteName?: string
+    remoteName?: string,
+    options?: string
   ): Promise<void> {
     const args = ['-c', 'protocol.version=2', 'fetch']
     if (!refSpec.some(x => x === refHelper.tagsRefSpec)) {
@@ -215,6 +239,10 @@ class GitCommandManager {
       )
     ) {
       args.push('--unshallow')
+    }
+
+    if (options) {
+      args.push(...options)
     }
 
     if (remoteName) {
@@ -302,6 +330,19 @@ class GitCommandManager {
     delete this.gitEnv[name]
   }
 
+  async revList(
+    commitExpression: string[],
+    options?: string[]
+  ): Promise<string> {
+    const args = ['rev-list']
+    if (options) {
+      args.push(...options)
+    }
+    args.push(...commitExpression)
+    const output = await this.execGit(args)
+    return output.stdout.trim()
+  }
+
   /**
    * Resolves a ref to a SHA. For a branch or lightweight tag, the commit SHA is returned.
    * For an annotated tag, the tag SHA is returned.
@@ -355,6 +396,15 @@ class GitCommandManager {
     }
 
     await this.execGit(args)
+  }
+
+  async symbolicRef(ref: string, options?: string[]): Promise<string> {
+    const args = ['symbolic-ref', ref]
+    if (options) {
+      args.push(...options)
+    }
+    const output = await this.execGit(args)
+    return output.stdout.trim()
   }
 
   async tagExists(pattern: string): Promise<boolean> {
