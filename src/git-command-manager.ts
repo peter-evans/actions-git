@@ -33,7 +33,7 @@ export interface IGitCommandManager {
     refSpec: string[],
     fetchDepth?: number,
     remoteName?: string,
-    options?: string
+    options?: string[]
   ): Promise<void>
   getWorkingDirectory(): string
   init(): Promise<void>
@@ -225,7 +225,7 @@ class GitCommandManager {
     refSpec: string[],
     fetchDepth?: number,
     remoteName?: string,
-    options?: string
+    options?: string[]
   ): Promise<void> {
     const args = ['-c', 'protocol.version=2', 'fetch']
     if (!refSpec.some(x => x === refHelper.tagsRefSpec)) {
