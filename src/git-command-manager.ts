@@ -38,6 +38,7 @@ export interface IGitCommandManager {
   getWorkingDirectory(): string
   init(): Promise<void>
   isDetached(): Promise<boolean>
+  isDirty(untracked: boolean): Promise<boolean>
   lfsFetch(ref: string): Promise<void>
   lfsInstall(): Promise<void>
   log1(options?: string[]): Promise<string>
@@ -49,6 +50,7 @@ export interface IGitCommandManager {
   revParse(ref: string): Promise<string>
   setEnvironmentVariable(name: string, value: string): void
   shaExists(sha: string): Promise<boolean>
+  status(options?: string[]): Promise<string>
   submoduleForeach(command: string, recursive: boolean): Promise<string>
   submoduleSync(recursive: boolean): Promise<void>
   submoduleUpdate(fetchDepth: number, recursive: boolean): Promise<void>
@@ -277,6 +279,23 @@ class GitCommandManager {
     return !output.stdout.trim().startsWith('refs/heads/')
   }
 
+  async isDirty(untracked: boolean): Promise<boolean> {
+    const diffArgs = ['--abbrev=40', '--full-index', '--raw']
+    // Check staged changes
+    if (await this.diff([...diffArgs, '--staged'])) {
+      return true
+    }
+    // Check working index changes
+    if (await this.diff(diffArgs)) {
+      return true
+    }
+    // Check untracked changes
+    if (untracked && (await this.status(['--porcelain', '-unormal']))) {
+      return true
+    }
+    return false
+  }
+
   async lfsFetch(ref: string): Promise<void> {
     const args = ['lfs', 'fetch', 'origin', ref]
 
@@ -362,6 +381,15 @@ class GitCommandManager {
     const args = ['rev-parse', '--verify', '--quiet', `${sha}^{object}`]
     const output = await this.execGit(args, true)
     return output.exitCode === 0
+  }
+
+  async status(options?: string[]): Promise<string> {
+    const args = ['status']
+    if (options) {
+      args.push(...options)
+    }
+    const output = await this.execGit(args)
+    return output.stdout.trim()
   }
 
   async submoduleForeach(command: string, recursive: boolean): Promise<string> {
