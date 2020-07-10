@@ -1,6 +1,6 @@
 {
   "name": "@peter-evans/actions-git",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "A git library for GitHub Actions",
   "main": "lib/actions-git.js",
   "types": "lib/actions-git.d.ts",
