@@ -6,6 +6,8 @@ A git library for GitHub Actions.
 This library extracts the git command internals of [actions/checkout](https://github.com/actions/checkout) into a module.
 It has then been extended with additional git commands.
 
+:warning: This library is intended to support my own GitHub actions. Updates may include breaking interface changes.
+
 ## Usage
 
 ```
