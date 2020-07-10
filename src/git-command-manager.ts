@@ -146,7 +146,7 @@ class GitCommandManager {
   }
 
   async checkout(ref: string, startPoint?: string): Promise<void> {
-    const args = ['checkout', '--progress', '--force']
+    const args = ['checkout', '--progress']
     if (startPoint) {
       args.push('-B', ref, startPoint)
     } else {
